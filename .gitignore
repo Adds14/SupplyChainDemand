@@ -1,0 +1,5 @@
+# Ignores the entire virtual environment folder
+.venv/
+
+# Ignores your secret passwords file
+.env
