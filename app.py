@@ -11,19 +11,14 @@ app = Flask(__name__)
 # CONFIGURATION
 # ##############################################################################
 
-# 1. --- !! IMPORTANT: SET A SECRET KEY !! ---
 app.config['SECRET_KEY'] = '1d3b0709f18e11a14c6e911299c8558f625e149f7e834d8e8b919d7f02272e29'
 
-# 2. --- !! IMPORTANT: DATABASE CONFIGURATION !! ---
 load_dotenv()  # <-- Add this line to load the .env file
 
 app = Flask(__name__)
 # You still need a secret key for 'flash' to work
 app.secret_key = os.environ.get('SECRET_KEY', 'a_fallback_secret_key_for_local_dev')
 
-# --- THIS IS THE KEY ---
-# Build your DB_CONFIG dict from the Environment Variables
-# This now works for BOTH local (from .env) and Render
 DB_CONFIG = {
     'user': os.environ.get('DB_USER'),
     'password': os.environ.get('DB_PASSWORD'),
@@ -32,7 +27,6 @@ DB_CONFIG = {
     'port': int(os.environ.get('DB_PORT', 3306))  # <-- Add this line
 }
 
-# --- YOUR FUNCTIONS (NO CHANGES NEEDED) ---
 
 def get_db_connection():
     """Establishes a connection to the MySQL database."""
