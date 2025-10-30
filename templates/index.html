@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="text-3xl font-bold text-gray-800 mb-6">SCM Dashboard</h1>
+
+<!-- Updated Dashboard Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+    <a href="{{ url_for('customer_list') }}" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+        <h2 class="text-xl font-semibold text-blue-700 mb-2">Manage Customers</h2>
+        <p class="text-gray-600">View, add, edit, and delete customer records.</p>
+    </a>
+
+    <a href="{{ url_for('product_list') }}" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+        <h2 class="text-xl font-semibold text-green-700 mb-2">Manage Products</h2>
+        <p class="text-gray-600">Browse product catalog and manage SKUs.</p>
+    </a>
+
+    <a href="{{ url_for('order_list') }}" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+        <h2 class="text-xl font-semibold text-yellow-700 mb-2">View Orders</h2>
+        <p class="text-gray-600">Track all incoming orders and their status.</p>
+    </a>
+
+    <a href="{{ url_for('reports_index') }}" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+        <h2 class="text-xl font-semibold text-purple-700 mb-2">Advanced Reports</h2>
+        <p class="text-gray-600">Run analytics on your supply chain data.</p>
+    </a>
+
+    <!-- Newly Added Cards -->
+    <a href="{{ url_for('supplier_list') }}" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+        <h2 class="text-xl font-semibold text-indigo-700 mb-2">Manage Suppliers</h2>
+        <p class="text-gray-600">Manage raw material suppliers.</p>
+    </a>
+
+    <a href="{{ url_for('manufacturer_list') }}" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+        <h2 class="text-xl font-semibold text-pink-700 mb-2">Manage Manufacturers</h2>
+        <p class="text-gray-600">Manage product manufacturers.</p>
+    </a>
+
+    <a href="{{ url_for('warehouse_list') }}" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+        <h2 class="text-xl font-semibold text-teal-700 mb-2">Manage Warehouses</h2>
+        <p class="text-gray-600">Manage storage facilities and capacity.</p>
+    </a>
+
+    <a href="{{ url_for('vehicle_list') }}" class="block p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+        <h2 class="text-xl font-semibold text-gray-700 mb-2">Manage Vehicles</h2>
+        <p class="text-gray-600">Manage transport fleet and status.</p>
+    </a>
+
+</div>
+{% endblock %}
+

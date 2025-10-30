@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{# This line was removed, as it was fixed in the previous step #}
+
+{% block content %}
+<a href="{{ url_for('reports_index') }}" class="text-blue-600 hover:text-blue-800 mb-6 block">&larr; Back to All Reports</a>
+
+<h1 class="text-3xl font-bold text-gray-800 mb-6">{{ report_title }}</h1>
+
+<div class="bg-white rounded-lg shadow-md overflow-hidden">
+    <table class="w-full table-auto">
+        <thead>
+            <tr class="bg-gray-100 border-b border-gray-300">
+                {% for header in report_headers %}
+                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
+                    {{ header }}
+                </th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% if report_data %}
+                {% for row in report_data %}
+                <tr class="border-b border-gray-200 hover:bg-gray-50">
+                    {% for header in report_headers %}
+                    <td class="px-4 py-3 text-sm text-gray-800">
+                        {{ row[header] }}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="{{ report_headers|length }}" class="text-center py-4">No data found for this report.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

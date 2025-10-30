@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="text-3xl font-bold text-gray-800 mb-6">{{ form_title }}</h1>
+
+<div class="bg-white p-8 rounded-lg shadow-md max-w-2xl mx-auto">
+    <form method="POST" action="">
+        <div class="space-y-6">
+            {% if not vehicle %}
+            <div>
+                <label for="vehicle_id" class="block text-sm font-medium text-gray-700">Vehicle ID</label>
+                <input type="number" name="vehicle_id" id="vehicle_id" required
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500">
+            </div>
+            {% endif %}
+
+            <div>
+                <label for="type" class="block text-sm font-medium text-gray-700">Type</label>
+                <input type="text" name="type" id="type" value="{{ vehicle.Type if vehicle else '' }}" required
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500">
+            </div>
+
+            <div>
+                <label for="license_plate" class="block text-sm font-medium text-gray-700">License Plate</label>
+                <input type="text" name="license_plate" id="license_plate" value="{{ vehicle.License_Plate if vehicle else '' }}" required
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500">
+            </div>
+
+            <div>
+                <label for="capacity" class="block text-sm font-medium text-gray-700">Capacity (e.g., 15000.00)</label>
+                <input type="number" step="0.01" name="capacity" id="capacity" value="{{ vehicle.Capacity if vehicle else '' }}"
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500">
+            </div>
+
+            <div>
+                <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                <select name="status" id="status" required
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500">
+                    <option value="Available" {% if vehicle and vehicle.Status == 'Available' %}selected{% endif %}>Available</option>
+                    <option value="In Transit" {% if vehicle and vehicle.Status == 'In Transit' %}selected{% endif %}>In Transit</option>
+                    <option value="Maintenance" {% if vehicle and vehicle.Status == 'Maintenance' %}selected{% endif %}>Maintenance</option>
+                    <option value="In Port" {% if vehicle and vehicle.Status == 'In Port' %}selected{% endif %}>In Port</option>
+                </select>
+            </div>
+
+            <div class="flex justify-end space-x-4">
+                <a href="{{ url_for('vehicle_list') }}" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300">
+                    Cancel
+                </a>
+                <button type="submit" class="bg-gray-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-gray-700">
+                    {% if vehicle %}Update Vehicle{% else %}Save Vehicle{% endif %}
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+

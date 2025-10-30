@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart SCM Dashboard</title>
+    <!-- Load Tailwind CSS from CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Simple style to make table headers look better */
+        th {
+            @apply px-4 py-2 bg-gray-200 text-gray-800 text-left;
+        }
+        td {
+            @apply px-4 py-2 border-b border-gray-200;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <!-- Header/Navigation Bar -->
+    <nav class="bg-gray-800 text-white shadow-lg">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <a href="{{ url_for('index') }}" class="text-2xl font-bold hover:text-gray-300">
+                        Smart Supply Chain
+                    </a>
+                </div>
+                <!-- Updated Nav Links -->
+                <div class="flex flex-wrap space-x-4">
+                    <a href="{{ url_for('index') }}" class="hover:text-gray-300">Dashboard</a>
+                    <a href="{{ url_for('customer_list') }}" class="hover:text-gray-300">Customers</a>
+                    <a href="{{ url_for('product_list') }}" class="hover:text-gray-300">Products</a>
+                    <a href="{{ url_for('order_list') }}" class="hover:text-gray-300">Orders</a>
+                    <a href="{{ url_for('supplier_list') }}" class="hover:text-gray-300">Suppliers</a>
+                    <a href="{{ url_for('manufacturer_list') }}" class="hover:text-gray-300">Manufacturers</a>
+                    <a href="{{ url_for('warehouse_list') }}" class="hover:text-gray-300">Warehouses</a>
+                    <a href="{{ url_for('vehicle_list') }}" class="hover:text-gray-300">Vehicles</a>
+                    <a href="{{ url_for('reports_index') }}" class="hover:text-gray-300">Reports</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="container mx-auto px-6 py-8">
+
+        <!-- Flash Messages (for success/error alerts) -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="mb-6">
+              {% for category, message in messages %}
+                <div class="p-4 rounded-md
+                            {% if category == 'success' %} bg-green-100 text-green-800
+                            {% elif category == 'danger' %} bg-red-100 text-red-800
+                            {% else %} bg-blue-100 text-blue-800 {% endif %}"
+                     role="alert">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+
+    </main>
+
+</body>
+</html>
+

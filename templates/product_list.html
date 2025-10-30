@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold text-gray-800">Products</h1>
+    <a href="{{ url_for('product_add') }}" class="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700 transition-colors">
+        Add New Product
+    </a>
+</div>
+
+<div class="bg-white rounded-lg shadow-md overflow-hidden">
+    <table class="w-full">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>SKU</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Manufacturer</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if products %}
+                {% for product in products %}
+                <tr class="hover:bg-gray-50">
+                    <td>{{ product.Product_ID }}</td>
+                    <td>{{ product.SKU }}</td>
+                    <td>{{ product.Name }}</td>
+                    <td class="text-sm text-gray-600">{{ product.Description[:50] }}{% if product.Description|length > 50 %}...{% endif %}</td>
+                    <td>{{ product.Manufacturer_Name or 'N/A' }}</td>
+                    <td class="flex space-x-2">
+                        <a href="{{ url_for('product_edit', product_id=product.Product_ID) }}" class="text-blue-600 hover:text-blue-800">Edit</a>
+                        <form action="{{ url_for('product_delete', product_id=product.Product_ID) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this product?');">
+                            <button type="submit" class="text-red-600 hover:text-red-800">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="6" class="text-center py-4">No products found.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+

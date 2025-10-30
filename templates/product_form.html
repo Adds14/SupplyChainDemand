@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="text-3xl font-bold text-gray-800 mb-6">{{ form_title }}</h1>
+
+<div class="bg-white p-8 rounded-lg shadow-md max-w-2xl mx-auto">
+    <form method="POST" action="">
+        <div class="space-y-6">
+
+            {% if not product %}
+            <div>
+                <label for="product_id" class="block text-sm font-medium text-gray-700">Product ID</label>
+                <input type="number" name="product_id" id="product_id" required
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            {% endif %}
+
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-700">Product Name</label>
+                <input type="text" name="name" id="name" value="{{ product.Name if product else '' }}" required
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <div>
+                <label for="sku" class="block text-sm font-medium text-gray-700">SKU</label>
+                <input type="text" name="sku" id="sku" value="{{ product.SKU if product else '' }}" required
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <div>
+                <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                <textarea name="description" id="description" rows="3"
+                          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">{{ product.Description if product else '' }}</textarea>
+            </div>
+
+            <div>
+                <label for="manufacturer_id" class="block text-sm font-medium text-gray-700">Manufacturer</label>
+                <select name="manufacturer_id" id="manufacturer_id" required
+                        class="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">Select a manufacturer</option>
+                    {% for m in manufacturers %}
+                        <option value="{{ m.Manufacturer_ID }}" {% if product and product.Manufacturer_ID == m.Manufacturer_ID %}selected{% endif %}>
+                            {{ m.Name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="flex justify-end space-x-4">
+                <a href="{{ url_for('product_list') }}" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300">
+                    Cancel
+                </a>
+                <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700">
+                    {% if product %}Update Product{% else %}Save Product{% endif %}
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+

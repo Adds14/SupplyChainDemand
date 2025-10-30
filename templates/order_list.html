@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="text-3xl font-bold text-gray-800 mb-6">Orders</h1>
+
+<div class="bg-white rounded-lg shadow-md overflow-hidden">
+    <table class="w-full">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Date</th>
+                <th>Customer</th>
+                <th>Order Status</th>
+                <th>Invoice Amount</th>
+                <th>Invoice Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if orders %}
+                {% for order in orders %}
+                <tr class="hover:bg-gray-50">
+                    <td>{{ order.Order_ID }}</td>
+                    <td>{{ order.Date.strftime('%Y-%m-%d') if order.Date else 'N/A' }}</td>
+                    <td>{{ order.Customer_Name or 'N/A' }}</td>
+                    <td>
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full
+                            {% if order.Status == 'Shipped' %} bg-green-100 text-green-800
+                            {% elif order.Status == 'Processing' %} bg-yellow-100 text-yellow-800
+                            {% else %} bg-gray-100 text-gray-800 {% endif %}">
+                            {{ order.Status }}
+                        </span>
+                    </td>
+                    <td>${{ "%.2f"|format(order.Amount) if order.Amount else '0.00' }}</td>
+                    <td>
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full
+                            {% if order.Invoice_Status == 'Paid' %} bg-green-100 text-green-800
+                            {% elif order.Invoice_Status == 'Pending' %} bg-red-100 text-red-800
+                            {% else %} bg-gray-100 text-gray-800 {% endif %}">
+                            {{ order.Invoice_Status or 'N/A' }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('order_detail', order_id=order.Order_ID) }}" class="text-blue-600 hover:text-blue-800">
+                            View Details
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="7" class="text-center py-4">No orders found.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="text-3xl font-bold text-gray-800 mb-6">Advanced Reports</h1>
+
+<div class="bg-white p-8 rounded-lg shadow-md">
+    <h2 class="text-xl font-semibold text-gray-800 mb-4">Available Reports</h2>
+    <ul class="space-y-3 list-disc list-inside">
+        {% for report in report_list %}
+        <li>
+            <a href="{{ url_for('run_report', report_name=report.id) }}" class="text-blue-600 hover:text-blue-800 hover:underline">
+                {{ report.name }}
+            </a>
+        </li>
+        {% else %}
+        <li>No reports configured.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
+

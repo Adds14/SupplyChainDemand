@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="text-3xl font-bold text-gray-800 mb-6">{{ form_title }}</h1>
+
+<div class="bg-white p-8 rounded-lg shadow-md max-w-2xl mx-auto">
+    <form method="POST" action="">
+        <div class="space-y-6">
+            {% if not warehouse %}
+            <div>
+                <label for="warehouse_id" class="block text-sm font-medium text-gray-700">Warehouse ID</label>
+                <input type="number" name="warehouse_id" id="warehouse_id" required
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500">
+            </div>
+            {% endif %}
+
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+                <input type="text" name="name" id="name" value="{{ warehouse.Name if warehouse else '' }}" required
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500">
+            </div>
+
+            <div>
+                <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
+                <input type="text" name="location" id="location" value="{{ warehouse.Location if warehouse else '' }}"
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500">
+            </div>
+
+            <div>
+                <label for="capacity" class="block text-sm font-medium text-gray-700">Capacity</label>
+                <input type="number" name="capacity" id="capacity" value="{{ warehouse.Capacity if warehouse else '' }}"
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-teal-500 focus:border-teal-500">
+            </div>
+
+            <div class="flex justify-end space-x-4">
+                <a href="{{ url_for('warehouse_list') }}" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300">
+                    Cancel
+                </a>
+                <button type="submit" class="bg-teal-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-teal-700">
+                    {% if warehouse %}Update Warehouse{% else %}Save Warehouse{% endif %}
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
