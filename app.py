@@ -728,8 +728,9 @@ def order_add():
 
         new_order_id = None  # Initialize
         try:
-            # 1. Get form data (including new Order_ID)
+            # 1. Get form data (including BOTH IDs)
             order_id = request.form['order_id']
+            invoice_id = request.form['invoice_id']  # <-- This is the required field
             customer_id = request.form['customer_id']
             order_date = request.form['order_date']
             due_date = request.form['due_date']
@@ -741,9 +742,9 @@ def order_add():
             # 3. Get the new Order_ID (it's the one from the form)
             new_order_id = order_id
 
-            # 4. Create the associated Invoice
-            query_invoice = "INSERT INTO Invoices (Order_ID, Amount, Status, Due_Date) VALUES (%s, %s, %s, %s)"
-            cursor.execute(query_invoice, (new_order_id, 0.00, 'Pending', due_date))
+            # 4. Create the associated Invoice (NOW with Invoice_ID)
+            query_invoice = "INSERT INTO Invoices (Invoice_ID, Order_ID, Amount, Status, Due_Date) VALUES (%s, %s, %s, %s, %s)"
+            cursor.execute(query_invoice, (invoice_id, new_order_id, 0.00, 'Pending', due_date))
 
             cnx.commit()
             flash("New order created. You can now add products.", "success")
