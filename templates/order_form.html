@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}{{ form_title }}{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold text-gray-800 mb-6">{{ form_title }}</h1>
+
+<div class="bg-white p-6 rounded-lg shadow-md max-w-lg mx-auto">
+    <form method="POST" class="space-y-4">
+
+        <div>
+            <label for="order_id" class="block text-sm font-medium text-gray-700">Order ID</label>
+            <input type="number" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" id="order_id" name="order_id" required>
+        </div>
+
+        <div>
+            <label for="customer_id" class="block text-sm font-medium text-gray-700">Customer</label>
+            <select class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" id="customer_id" name="customer_id" required>
+                <option value="" disabled selected>Select a customer...</option>
+                {% for customer in customers %}
+                <option value="{{ customer.Customer_ID }}">{{ customer.Name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label for="order_date" class="block text-sm font-medium text-gray-700">Order Date</label>
+            <input type="date" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" id="order_date" name="order_date" required>
+        </div>
+
+        <div>
+            <label for="due_date" class="block text-sm font-medium text-gray-700">Invoice Due Date</LabeL>
+            <input type="date" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" id="due_date" name="due_date" required>
+        </div>
+
+        <hr>
+
+        <div class="flex justify-end space-x-3">
+            <a href="{{ url_for('order_list') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded">Cancel</a>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Create Order</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -716,6 +716,205 @@ def vehicle_delete(vehicle_id):
 # ORDER & SHIPMENT VIEW ROUTES
 # ##############################################################################
 
+@app.route('/orders/add', methods=['GET', 'POST'])
+def order_add():
+    """Handles creating a new, empty order and its associated invoice."""
+
+    if request.method == 'POST':
+        # --- This block handles the POST request ---
+        cnx, cursor = get_db_connection()
+        if cnx is None:
+            return redirect(url_for('index'))
+
+        new_order_id = None  # Initialize
+        try:
+            # 1. Get form data (including new Order_ID)
+            order_id = request.form['order_id']
+            customer_id = request.form['customer_id']
+            order_date = request.form['order_date']
+            due_date = request.form['due_date']
+
+            # 2. Create the Order
+            query_order = "INSERT INTO Orders (Order_ID, Customer_ID, Date, Status) VALUES (%s, %s, %s, %s)"
+            cursor.execute(query_order, (order_id, customer_id, order_date, 'Pending'))
+
+            # 3. Get the new Order_ID (it's the one from the form)
+            new_order_id = order_id
+
+            # 4. Create the associated Invoice
+            query_invoice = "INSERT INTO Invoices (Order_ID, Amount, Status, Due_Date) VALUES (%s, %s, %s, %s)"
+            cursor.execute(query_invoice, (new_order_id, 0.00, 'Pending', due_date))
+
+            cnx.commit()
+            flash("New order created. You can now add products.", "success")
+            # Redirect to the detail page to add items
+            return redirect(url_for('order_detail', order_id=new_order_id))
+
+        except mysql.connector.Error as err:
+            flash(f"Error creating order: {err}", "danger")
+            # On error, redirect back to the 'GET' route of this page
+            return redirect(url_for('order_add'))
+        finally:
+            close_connection(cnx, cursor)
+
+    # --- This block handles the GET request (showing the form) ---
+    cnx, cursor = get_db_connection()
+    if cnx is None:
+        return redirect(url_for('index'))
+
+    try:
+        cursor.execute("SELECT Customer_ID, Name FROM Customers ORDER BY Name")
+        customers = cursor.fetchall()
+        return render_template('order_form.html', customers=customers, form_title="Create New Order")
+    except mysql.connector.Error as err:
+        flash(f"Database error: {err}", "danger")
+        return redirect(url_for('order_list'))
+    finally:
+        close_connection(cnx, cursor)
+
+
+@app.route('/orders/<int:order_id>/add_item', methods=['POST'])
+def order_add_item(order_id):
+    """Adds a product (item) to an existing order and updates the invoice total."""
+    cnx, cursor = get_db_connection()
+    if cnx is None:
+        return redirect(url_for('order_list'))
+
+    try:
+        product_id = request.form['product_id']
+        quantity = int(request.form['quantity'])
+
+        if quantity <= 0:
+            flash("Quantity must be a positive number.", "warning")
+            return redirect(url_for('order_detail', order_id=order_id))
+
+        # 1. Get the product's unit price (ASSUMES UnitPrice column exists!)
+        cursor.execute("SELECT UnitPrice FROM Products WHERE Product_ID = %s", (product_id,))
+        product = cursor.fetchone()
+
+        if not product:
+            flash("Product not found!", "danger")
+            return redirect(url_for('order_detail', order_id=order_id))
+
+        unit_price = product['UnitPrice']
+        item_total = unit_price * quantity
+
+        # 2. Add item to order_items (use ON DUPLICATE KEY UPDATE to handle adding same item)
+        query_item = """
+            INSERT INTO order_items (Order_ID, Product_ID, Quantity) 
+            VALUES (%s, %s, %s)
+            ON DUPLICATE KEY UPDATE Quantity = Quantity + %s
+        """
+        # Note: If updating, the invoice logic will only add the *new* quantity's price.
+        # For simplicity here, we assume a new item or simple addition.
+        # A more complex app would check if the item exists first.
+        # Let's simplify: check first.
+
+        cursor.execute("SELECT * FROM order_items WHERE Order_ID = %s AND Product_ID = %s", (order_id, product_id))
+        existing_item = cursor.fetchone()
+
+        if existing_item:
+            # Item exists, update its quantity
+            new_quantity = existing_item['Quantity'] + quantity
+            cursor.execute("UPDATE order_items SET Quantity = %s WHERE Order_ID = %s AND Product_ID = %s",
+                           (new_quantity, order_id, product_id))
+        else:
+            # New item, insert it
+            cursor.execute("INSERT INTO order_items (Order_ID, Product_ID, Quantity) VALUES (%s, %s, %s)",
+                           (order_id, product_id, quantity))
+
+        # 3. Update the Invoice Amount
+        query_invoice = "UPDATE Invoices SET Amount = Amount + %s WHERE Order_ID = %s"
+        cursor.execute(query_invoice, (item_total, order_id))
+
+        cnx.commit()
+        flash(f"Item added to order. Invoice updated.", "success")
+
+    except mysql.connector.Error as err:
+        flash(f"Error adding item: {err}", "danger")
+    finally:
+        close_connection(cnx, cursor)
+
+    return redirect(url_for('order_detail', order_id=order_id))
+
+
+@app.route('/orders/<int:order_id>/remove_item/<int:product_id>', methods=['POST'])
+def order_remove_item(order_id, product_id):
+    """Removes an item from an order and updates the invoice."""
+    cnx, cursor = get_db_connection()
+    if cnx is None:
+        return redirect(url_for('order_list'))
+
+    try:
+        # 1. Get item quantity and unit price before deleting
+        query_get = """
+            SELECT oi.Quantity, p.UnitPrice 
+            FROM order_items oi
+            JOIN Products p ON oi.Product_ID = p.Product_ID
+            WHERE oi.Order_ID = %s AND oi.Product_ID = %s
+        """
+        cursor.execute(query_get, (order_id, product_id))
+        item = cursor.fetchone()
+
+        if not item:
+            flash("Item not found on this order.", "warning")
+            return redirect(url_for('order_detail', order_id=order_id))
+
+        # 2. Calculate amount to remove
+        total_to_remove = item['Quantity'] * item['UnitPrice']
+
+        # 3. Delete the item
+        cursor.execute("DELETE FROM order_items WHERE Order_ID = %s AND Product_ID = %s", (order_id, product_id))
+
+        # 4. Update the Invoice Amount
+        cursor.execute("UPDATE Invoices SET Amount = Amount - %s WHERE Order_ID = %s", (total_to_remove, order_id))
+
+        cnx.commit()
+        flash("Item removed from order. Invoice updated.", "success")
+
+    except mysql.connector.Error as err:
+        flash(f"Error removing item: {err}", "danger")
+    finally:
+        close_connection(cnx, cursor)
+
+    return redirect(url_for('order_detail', order_id=order_id))
+
+
+@app.route('/orders/delete/<int:order_id>', methods=['POST'])
+def order_delete(order_id):
+    """Handles deleting an entire order and its related data."""
+    cnx, cursor = get_db_connection()
+    if cnx is None:
+        return redirect(url_for('order_list'))
+
+    try:
+        # We must delete from "child" tables first to avoid foreign key errors.
+        # These tables all have an Order_ID that references the Orders table.
+
+        # 1. Delete from order_items
+        cursor.execute("DELETE FROM order_items WHERE Order_ID = %s", (order_id,))
+
+        # 2. Delete from Invoices
+        cursor.execute("DELETE FROM Invoices WHERE Order_ID = %s", (order_id,))
+
+        # 3. Delete from Shipments (if any)
+        cursor.execute("DELETE FROM Shipments WHERE Order_ID = %s", (order_id,))
+
+        # 4. Finally, delete the "parent" order itself
+        cursor.execute("DELETE FROM Orders WHERE Order_ID = %s", (order_id,))
+
+        # If all deletes succeed, commit the transaction
+        cnx.commit()
+        flash(f"Order #{order_id} and all related records deleted successfully!", "success")
+
+    except mysql.connector.Error as err:
+        # If any delete fails, the commit won't happen, and the database state is safe.
+        flash(f"Error deleting order: {err}. (Check for related records).", "danger")
+    finally:
+        close_connection(cnx, cursor)
+
+    return redirect(url_for('order_list'))
+
 @app.route('/orders')
 def order_list():
     """Displays a list of all orders with customer and invoice info."""
@@ -753,6 +952,7 @@ def order_detail(order_id):
         data = {}
 
         # 1. Get Order, Customer, and Invoice Info
+        # (This query is unchanged)
         query_order = """
             SELECT o.*, c.Name as Customer_Name, c.Address as Customer_Address, c.Contact as Customer_Contact,
                    i.Invoice_ID, i.Amount, i.Due_Date, i.Status as Invoice_Status
@@ -769,6 +969,7 @@ def order_detail(order_id):
             return redirect(url_for('order_list'))
 
         # 2. Get Order Items (Products in the order)
+        # (This query is unchanged)
         query_items = """
             SELECT oi.Quantity, p.Product_ID, p.Name, p.SKU
             FROM order_items oi
@@ -779,6 +980,7 @@ def order_detail(order_id):
         data['items'] = cursor.fetchall()
 
         # 3. Get Shipment Info
+        # (This query is unchanged)
         query_shipment = """
             SELECT s.*, v.Type as Vehicle_Type, v.License_Plate
             FROM Shipments s
@@ -788,6 +990,18 @@ def order_detail(order_id):
         cursor.execute(query_shipment, (order_id,))
         data['shipments'] = cursor.fetchall()
 
+        # 4. --- !! NEW !! ---
+        # Get all products for the "Add Item" dropdown
+        # (Assumes Products.UnitPrice exists!)
+        query_all_products = """
+            SELECT Product_ID, Name, UnitPrice 
+            FROM Products 
+            ORDER BY Name
+        """
+        cursor.execute(query_all_products)
+        data['all_products'] = cursor.fetchall()
+        # --- END NEW ---
+
         return render_template('order_detail.html', **data)
 
     except mysql.connector.Error as err:
@@ -795,7 +1009,6 @@ def order_detail(order_id):
         return redirect(url_for('order_list'))
     finally:
         close_connection(cnx, cursor)
-
 
 # ##############################################################################
 # ADVANCED REPORTS ROUTES

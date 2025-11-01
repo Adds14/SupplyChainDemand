@@ -1,29 +1,34 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1 class="text-3xl font-bold text-gray-800 mb-6">Orders</h1>
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold text-gray-800">Orders</h1>
+    <a href="{{ url_for('order_add') }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+        + Add New Order
+    </a>
+</div>
 
 <div class="bg-white rounded-lg shadow-md overflow-hidden">
     <table class="w-full">
-        <thead>
-            <tr>
-                <th>Order ID</th>
-                <th>Date</th>
-                <th>Customer</th>
-                <th>Order Status</th>
-                <th>Invoice Amount</th>
-                <th>Invoice Status</th>
-                <th>Actions</th>
+        <thead class="bg-gray-50">
+            <tr class="border-b">
+                <th class="p-3 text-left">Order ID</th>
+                <th class="p-3 text-left">Date</th>
+                <th class="p-3 text-left">Customer</th>
+                <th class="p-3 text-left">Order Status</th>
+                <th class="p-3 text-left">Invoice Amount</th>
+                <th class="p-3 text-left">Invoice Status</th>
+                <th class="p-3 text-left">Actions</th>
             </tr>
         </thead>
         <tbody>
             {% if orders %}
                 {% for order in orders %}
-                <tr class="hover:bg-gray-50">
-                    <td>{{ order.Order_ID }}</td>
-                    <td>{{ order.Date.strftime('%Y-%m-%d') if order.Date else 'N/A' }}</td>
-                    <td>{{ order.Customer_Name or 'N/A' }}</td>
-                    <td>
+                <tr class="hover:bg-gray-50 border-b">
+                    <td class="p-3">{{ order.Order_ID }}</td>
+                    <td class="p-3">{{ order.Date.strftime('%Y-%m-%d') if order.Date else 'N/A' }}</td>
+                    <td class="p-3">{{ order.Customer_Name or 'N/A' }}</td>
+                    <td class="p-3">
                         <span class="px-2 py-1 text-xs font-semibold rounded-full
                             {% if order.Status == 'Shipped' %} bg-green-100 text-green-800
                             {% elif order.Status == 'Processing' %} bg-yellow-100 text-yellow-800
@@ -31,8 +36,8 @@
                             {{ order.Status }}
                         </span>
                     </td>
-                    <td>${{ "%.2f"|format(order.Amount) if order.Amount else '0.00' }}</td>
-                    <td>
+                    <td class="p-3">${{ "%.2f"|format(order.Amount) if order.Amount else '0.00' }}</td>
+                    <td class="p-3">
                         <span class="px-2 py-1 text-xs font-semibold rounded-full
                             {% if order.Invoice_Status == 'Paid' %} bg-green-100 text-green-800
                             {% elif order.Invoice_Status == 'Pending' %} bg-red-100 text-red-800
@@ -40,20 +45,24 @@
                             {{ order.Invoice_Status or 'N/A' }}
                         </span>
                     </td>
-                    <td>
-                        <a href="{{ url_for('order_detail', order_id=order.Order_ID) }}" class="text-blue-600 hover:text-blue-800">
+                    <td class="p-3 flex items-center space-x-3">
+                        <a href="{{ url_for('order_detail', order_id=order.Order_ID) }}" class="text-blue-600 hover:text-blue-800 font-medium">
                             View Details
                         </a>
+                        <form action="{{ url_for('order_delete', order_id=order.Order_ID) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to PERMANENTLY delete Order #{{ order.Order_ID }} and its invoice? This cannot be undone.');">
+                            <button type="submit" class="text-red-500 hover:text-red-700 font-medium">
+                                Delete
+                            </button>
+                        </form>
                     </td>
                 </tr>
                 {% endfor %}
             {% else %}
                 <tr>
-                    <td colspan="7" class="text-center py-4">No orders found.</td>
+                    <td colspan="7" class="text-center py-4 text-gray-500">No orders found.</td>
                 </tr>
             {% endif %}
         </tbody>
     </table>
 </div>
 {% endblock %}
-
